@@ -3,26 +3,40 @@ import shutil
 import file
 
 # Getting all files in specific directory
-oldPath = "./testData/testDir"
-newPath = "./testData/newTestDir"
-files = []
-for (dirPath, dirNames, fileNames) in os.walk(oldPath):
-    for fileName in fileNames:
-        newFile = file.File(fileName, dirPath)
-        files.append(newFile)
-
-# Divide them into categories
-categories = {}
-for newFile in files:
-        extension = newFile.getExtension()
-
-        if not extension in categories:
-            categories[extension] = list() # Create new list for files in category
+def getFiles(dir: str):
+    files = []
+    for (dirPath, dirNames, fileNames) in os.walk(dir):
+        for fileName in fileNames:
+            newFile = file.File(fileName, dirPath)
+            files.append(newFile)
     
-        categories[extension].append(newFile)
+    return files
 
-# Move into separate files
-for category in categories:
-     newFolder = os.mkdir(f'{newPath}/{category}')
-     for newFile in categories[category]:
-          shutil.copy(f'{newFile.getPath()}/{newFile.getName()}', f'{newPath}/{category}/{newFile.getName()}') # Copy files from old path to new
+# Dividing files into categories
+def categoriseFiles(files: list[file.File]):
+    categories = {}
+    for newFile in files:
+            extension = newFile.getExtension()
+
+            if not extension in categories:
+                categories[extension] = list() # Create new list for files in category
+
+            categories[extension].append(newFile)
+    
+    return categories
+
+# Moving files from one folder to another
+def moveFiles(categories: dict, newPath: str):
+    for category in categories:
+        newFolder = os.mkdir(f'{newPath}/{category}')
+        for newFile in categories[category]:
+            shutil.copy(f'{newFile.getPath()}/{newFile.getName()}', f'{newPath}/{category}/{newFile.getName()}') # Copy files from old path to new
+
+
+def main():
+    files = getFiles("./testData/testDir")
+    newPath = "./testData/newTestDir"
+    categories = categoriseFiles(files)
+    moveFiles(categories, newPath)
+
+main()
